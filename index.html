@@ -145,7 +145,8 @@
             const sourceMap = new Map(source.map(s => [s.name, s]));
             const NAME_CORRECTIONS = {
                 'Zdzisław Kosecki': 'Zdzisław Koseski',
-                'Zdzisława Koseski': 'Zdzisław Koseski'
+                'Zdzisława Koseski': 'Zdzisław Koseski',
+                'Tomasz Paweł Wawrzak': 'Tomasz Wawrzak'
             };
 
             const normalized = (loaded || []).map(p => ({ ...p, name: NAME_CORRECTIONS[p.name] || p.name }));
