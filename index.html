@@ -393,50 +393,53 @@
                 }
             };
 
-            const addToCalendar = (person) => {
-                if (!person.birthDate) return alert('Uzupełnij datę urodzenia, aby ustawić przypomnienie.');
-
-                const birthDate = new Date(person.birthDate);
+            const getEventDates = (birthDateString) => {
+                const birthDate = new Date(birthDateString);
                 const now = new Date();
-                let nextBirthdayYear = now.getFullYear();
+                let nextYear = now.getFullYear();
+                const thisYearBday = new Date(now.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+                if (thisYearBday < now) nextYear += 1;
+                const pad = n => String(n).padStart(2, '0');
+                const m = pad(birthDate.getMonth() + 1);
+                const d = pad(birthDate.getDate());
+                return { start: `${nextYear}${m}${d}T090000`, end: `${nextYear}${m}${d}T100000` };
+            };
 
-                const birthdayThisYear = new Date(now.getFullYear(), birthDate.getMonth(), birthDate.getDate());
-                if (birthdayThisYear < now) nextBirthdayYear += 1;
+            const addToGoogleCalendar = (person) => {
+                if (!person.birthDate) return alert('Brak daty urodzenia!');
+                const { start, end } = getEventDates(person.birthDate);
+                const text = encodeURIComponent(`🎂 Urodziny: ${person.name}`);
+                const details = encodeURIComponent(`To już za tydzień!\nTelefon: ${person.phone||'brak'}\nAdres: ${person.address||'brak'}\n\n(Pamiętaj ustawić przypomnienie!)`);
+                const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${start}/${end}&details=${details}&sprop=&sprop=name:`;
+                window.open(url, '_blank');
+            };
 
-                const pad = (n) => String(n).padStart(2, '0');
-                const month = pad(birthDate.getMonth() + 1);
-                const day = pad(birthDate.getDate());
-
-                const eventStart = `${nextBirthdayYear}${month}${day}T090000`;
-                const eventEnd = `${nextBirthdayYear}${month}${day}T100000`;
-
-                const icsContent = [
+            const addToCalendar = (person) => {
+                if (!person.birthDate) return alert('Brak daty urodzenia!');
+                const { start, end } = getEventDates(person.birthDate);
+                const ics = [
                     'BEGIN:VCALENDAR',
                     'VERSION:2.0',
-                    'PRODID:-//WawrzakBoard//Bdays//PL',
-                    'CALSCALE:GREGORIAN',
-                    'METHOD:PUBLISH',
+                    'PRODID:-//Wawrzak//App//EN',
                     'BEGIN:VEVENT',
-                    `UID:${Date.now()}@wawrzakboard.com`,
+                    `UID:${Date.now()}@wawrzak.app`,
                     `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
-                    `DTSTART:${eventStart}`,
-                    `DTEND:${eventEnd}`,
+                    `DTSTART:${start}`,
+                    `DTEND:${end}`,
                     `SUMMARY:🎂 Urodziny: ${person.name}`,
-                    `DESCRIPTION:To już za tydzień!\\nTelefon: ${person.phone || 'brak'}\\nAdres: ${person.address || 'brak'}`,
-                    'RRULE:FREQ=YEARLY',
+                    `DESCRIPTION:Przypomnienie: Kup prezent! Tel: ${person.phone||''}`,
                     'BEGIN:VALARM',
-                    'TRIGGER;RELATED=START:-P7D',
+                    'TRIGGER:-PT10080M',
                     'ACTION:DISPLAY',
-                    'DESCRIPTION:Przypomnienie o prezencie',
+                    'DESCRIPTION:Alarm 7 dni przed',
                     'END:VALARM',
                     'END:VEVENT',
                     'END:VCALENDAR'
                 ].join('\r\n');
-
-                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+                const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
                 const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.setAttribute('download', `Urodziny_${person.name.replace(/\s+/g, '_')}.ics`);
+                link.href = URL.createObjectURL(blob);
+                link.download = `Urodziny_${person.name}.ics`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -564,9 +567,14 @@
                                             </div>
                                         </div>
                                         <div className="bg-slate-50/50 p-3 pl-7 border-t border-slate-100 flex items-center gap-2">
-                                            <button onClick={() => addToCalendar(person)} className="flex-1 bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 text-slate-600 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition flex items-center justify-center gap-2 shadow-sm">
-                                                <Icons.Bell size={14} /> Przypomnij
-                                            </button>
+                                            <div className="flex-1 flex gap-1">
+                                                <button onClick={() => addToGoogleCalendar(person)} className="flex-1 bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 text-slate-600 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wide flex items-center justify-center gap-1">
+                                                    Google
+                                                </button>
+                                                <button onClick={() => addToCalendar(person)} className="px-3 bg-white border border-slate-200 hover:border-slate-400 text-slate-500 rounded-lg flex items-center justify-center">
+                                                    <Icons.Save size={14} />
+                                                </button>
+                                            </div>
                                             <button onClick={() => { setSelectedPerson(person); setIsDetailsOpen(true); }} className="flex-1 bg-white border border-slate-200 hover:border-amber-400 hover:text-amber-600 text-slate-600 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition flex items-center justify-center gap-2 shadow-sm">
                                                 <Icons.Gift size={14} /> Szczegóły
                                             </button>
