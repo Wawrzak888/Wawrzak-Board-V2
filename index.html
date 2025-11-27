@@ -414,36 +414,6 @@
                 window.open(url, '_blank');
             };
 
-            const addToCalendar = (person) => {
-                if (!person.birthDate) return alert('Brak daty urodzenia!');
-                const { start, end } = getEventDates(person.birthDate);
-                const ics = [
-                    'BEGIN:VCALENDAR',
-                    'VERSION:2.0',
-                    'PRODID:-//Wawrzak//App//EN',
-                    'BEGIN:VEVENT',
-                    `UID:${Date.now()}@wawrzak.app`,
-                    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
-                    `DTSTART:${start}`,
-                    `DTEND:${end}`,
-                    `SUMMARY:🎂 Urodziny: ${person.name}`,
-                    `DESCRIPTION:Przypomnienie: Kup prezent! Tel: ${person.phone||''}`,
-                    'BEGIN:VALARM',
-                    'TRIGGER:-PT10080M',
-                    'ACTION:DISPLAY',
-                    'DESCRIPTION:Alarm 7 dni przed',
-                    'END:VALARM',
-                    'END:VEVENT',
-                    'END:VCALENDAR'
-                ].join('\r\n');
-                const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `Urodziny_${person.name}.ics`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
 
             const calculateAge = (birthDate) => {
                 if (!birthDate) return '';
@@ -567,14 +537,9 @@
                                             </div>
                                         </div>
                                         <div className="bg-slate-50/50 p-3 pl-7 border-t border-slate-100 flex items-center gap-2">
-                                            <div className="flex-1 flex gap-1">
-                                                <button onClick={() => addToGoogleCalendar(person)} className="flex-1 bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 text-slate-600 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wide flex items-center justify-center gap-1">
-                                                    Google
-                                                </button>
-                                                <button onClick={() => addToCalendar(person)} className="px-3 bg-white border border-slate-200 hover:border-slate-400 text-slate-500 rounded-lg flex items-center justify-center">
-                                                    <Icons.Save size={14} />
-                                                </button>
-                                            </div>
+                                            <button onClick={() => addToGoogleCalendar(person)} className="flex-1 bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 text-slate-600 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition flex items-center justify-center gap-2 shadow-sm">
+                                                <Icons.Calendar size={14} /> Dodaj do Google
+                                            </button>
                                             <button onClick={() => { setSelectedPerson(person); setIsDetailsOpen(true); }} className="flex-1 bg-white border border-slate-200 hover:border-amber-400 hover:text-amber-600 text-slate-600 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition flex items-center justify-center gap-2 shadow-sm">
                                                 <Icons.Gift size={14} /> Szczegóły
                                             </button>
