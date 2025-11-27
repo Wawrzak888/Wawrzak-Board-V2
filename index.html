@@ -395,15 +395,41 @@
 
             const addToCalendar = (person) => {
                 if (!person.birthDate) return alert('Uzupełnij datę urodzenia, aby ustawić przypomnienie.');
+
                 const birthDate = new Date(person.birthDate);
                 const now = new Date();
                 let nextBirthdayYear = now.getFullYear();
+
                 const birthdayThisYear = new Date(now.getFullYear(), birthDate.getMonth(), birthDate.getDate());
                 if (birthdayThisYear < now) nextBirthdayYear += 1;
 
-                const eventDate = `${nextBirthdayYear}${String(birthDate.getMonth() + 1).padStart(2, '0')}${String(birthDate.getDate()).padStart(2, '0')}`;
-                const reminderTrigger = `-P${formData.reminderDays || 3}D`; 
-                const icsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:-//WawrzakBoard//Bdays//PL\nBEGIN:VEVENT\nUID:${Date.now()}@wawrzakboard.com\nDTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z\nDTSTART;VALUE=DATE:${eventDate}\nSUMMARY:🎂 Urodziny: ${person.name}\nDESCRIPTION:Pamiętaj o życzeniach! Telefon: ${person.phone}. Uwagi: ${person.notes}\nRRULE:FREQ=YEARLY\nBEGIN:VALARM\nTRIGGER:${reminderTrigger}\nDESCRIPTION:Przypomnienie o urodzinach - Wawrzak Board\nACTION:DISPLAY\nEND:VALARM\nEND:VEVENT\nEND:VCALENDAR`;
+                const pad = (n) => String(n).padStart(2, '0');
+                const month = pad(birthDate.getMonth() + 1);
+                const day = pad(birthDate.getDate());
+
+                const eventStart = `${nextBirthdayYear}${month}${day}T090000`;
+                const eventEnd = `${nextBirthdayYear}${month}${day}T100000`;
+
+                const icsContent = [
+                    'BEGIN:VCALENDAR',
+                    'VERSION:2.0',
+                    'PRODID:-//WawrzakBoard//Bdays//PL',
+                    'BEGIN:VEVENT',
+                    `UID:${Date.now()}@wawrzakboard.com`,
+                    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
+                    `DTSTART:${eventStart}`,
+                    `DTEND:${eventEnd}`,
+                    `SUMMARY:🎂 Urodziny: ${person.name}`,
+                    `DESCRIPTION:To już za tydzień! Telefon: ${person.phone || 'brak'}. Adres: ${person.address || 'brak'}`,
+                    'RRULE:FREQ=YEARLY',
+                    'BEGIN:VALARM',
+                    'TRIGGER:-P7D',
+                    'DESCRIPTION:Przypomnienie 7 dni przed',
+                    'ACTION:DISPLAY',
+                    'END:VALARM',
+                    'END:VEVENT',
+                    'END:VCALENDAR'
+                ].join('\n');
 
                 const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
                 const link = document.createElement('a');
