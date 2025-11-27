@@ -420,7 +420,29 @@
                 return Math.abs(new Date(diff).getUTCFullYear() - 1970);
             };
 
-            const displayList = people.filter(p => p.type === activeTab);
+            const getDaysUntilBirthday = (birthDateString) => {
+                if (!birthDateString) return Number.POSITIVE_INFINITY;
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                const parts = birthDateString.split('-').map(Number);
+                const year = today.getFullYear();
+                const month = parts[1];
+                const day = parts[2];
+                if (!month || !day) return Number.POSITIVE_INFINITY;
+                let next = new Date(year, month - 1, day);
+                next.setHours(0,0,0,0);
+                if (next < today) {
+                    next = new Date(year + 1, month - 1, day);
+                    next.setHours(0,0,0,0);
+                }
+                const diffMs = next.getTime() - today.getTime();
+                return Math.round(diffMs / (1000 * 60 * 60 * 24));
+            };
+
+            const displayList = people
+                .filter(p => p.type === activeTab)
+                .map(p => ({ ...p, __days: getDaysUntilBirthday(p.birthDate) }))
+                .sort((a, b) => a.__days - b.__days);
 
             return (
                 <div className="min-h-screen bg-slate-50 font-sans text-slate-800 pb-20">
@@ -479,6 +501,11 @@
                                                 {person.birthDate && (
                                                     <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide">
                                                         {calculateAge(person.birthDate)} lat
+                                                    </span>
+                                                )}
+                                                {Number.isFinite(person.__days) && (
+                                                    <span className={`ml-2 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide ${person.__days === 0 ? 'bg-pink-500 text-white animate-pulse' : (person.__days <= 30 ? 'bg-amber-400 text-slate-900' : 'bg-slate-200 text-slate-600')}`}>
+                                                        {person.__days === 0 ? 'DZIŚ!' : `Za ${person.__days} dni`}
                                                     </span>
                                                 )}
                                             </div>
