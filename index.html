@@ -414,22 +414,24 @@
                     'BEGIN:VCALENDAR',
                     'VERSION:2.0',
                     'PRODID:-//WawrzakBoard//Bdays//PL',
+                    'CALSCALE:GREGORIAN',
+                    'METHOD:PUBLISH',
                     'BEGIN:VEVENT',
                     `UID:${Date.now()}@wawrzakboard.com`,
                     `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`,
                     `DTSTART:${eventStart}`,
                     `DTEND:${eventEnd}`,
                     `SUMMARY:🎂 Urodziny: ${person.name}`,
-                    `DESCRIPTION:To już za tydzień! Telefon: ${person.phone || 'brak'}. Adres: ${person.address || 'brak'}`,
+                    `DESCRIPTION:To już za tydzień!\\nTelefon: ${person.phone || 'brak'}\\nAdres: ${person.address || 'brak'}`,
                     'RRULE:FREQ=YEARLY',
                     'BEGIN:VALARM',
-                    'TRIGGER:-P7D',
-                    'DESCRIPTION:Przypomnienie 7 dni przed',
+                    'TRIGGER;RELATED=START:-P7D',
                     'ACTION:DISPLAY',
+                    'DESCRIPTION:Przypomnienie o prezencie',
                     'END:VALARM',
                     'END:VEVENT',
                     'END:VCALENDAR'
-                ].join('\n');
+                ].join('\r\n');
 
                 const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
                 const link = document.createElement('a');
@@ -697,13 +699,9 @@
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<WawrzakBoard />);
 
-        // --- 3. REJESTRACJA SERVICE WORKER (SW.JS) ---
-        // To mówi przeglądarce: "Hej, tutaj jest plik sw.js, użyj go!"
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('Service Worker OK', reg))
-                    .catch(err => console.log('Błąd SW', err));
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                regs.forEach(reg => reg.unregister());
             });
         }
     </script>
