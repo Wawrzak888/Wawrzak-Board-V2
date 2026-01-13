@@ -302,6 +302,11 @@
             const [isDetailsOpen, setIsDetailsOpen] = useState(false);
             const [selectedPerson, setSelectedPerson] = useState(null);
             const [isUserPickerOpen, setIsUserPickerOpen] = useState(false);
+            
+            // --- NOWE STANY DLA KALENDARZA ---
+            const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+            const [calendarPerson, setCalendarPerson] = useState(null);
+            const [daysBeforeBirthday, setDaysBeforeBirthday] = useState(7);
 
             useEffect(() => {
                 if (!Fire) return;
@@ -393,27 +398,54 @@
                 }
             };
 
-            const getEventDates = (birthDateString) => {
-                const birthDate = new Date(birthDateString);
-                const now = new Date();
-                let nextYear = now.getFullYear();
-                const thisYearBday = new Date(now.getFullYear(), birthDate.getMonth(), birthDate.getDate());
-                if (thisYearBday < now) nextYear += 1;
-                const pad = n => String(n).padStart(2, '0');
-                const m = pad(birthDate.getMonth() + 1);
-                const d = pad(birthDate.getDate());
-                return { start: `${nextYear}${m}${d}T090000`, end: `${nextYear}${m}${d}T100000` };
+            // --- ZMIANA LOGIKI KALENDARZA ---
+            
+            // Funkcja otwierająca modal z wyborem daty
+            const openCalendarModal = (person) => {
+                if (!person.birthDate) return alert('Ta osoba nie ma ustawionej daty urodzenia!');
+                setCalendarPerson(person);
+                setDaysBeforeBirthday(7); // Domyślnie tydzień przed
+                setIsCalendarModalOpen(true);
             };
 
-            const addToGoogleCalendar = (person) => {
-                if (!person.birthDate) return alert('Brak daty urodzenia!');
-                const { start, end } = getEventDates(person.birthDate);
-                const text = encodeURIComponent(`🎂 Urodziny: ${person.name}`);
-                const details = encodeURIComponent(`To już za tydzień!\nTelefon: ${person.phone||'brak'}\nAdres: ${person.address||'brak'}\n\n(Pamiętaj ustawić przypomnienie!)`);
-                const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${start}/${end}&details=${details}&sprop=&sprop=name:`;
-                window.open(url, '_blank');
-            };
+            // Główna funkcja generująca link
+            const generateCalendarLink = (person, daysOffset) => {
+                const today = new Date();
+                const birthDate = new Date(person.birthDate);
+                
+                // 1. Oblicz datę najbliższych urodzin
+                let nextBday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+                if (nextBday < today) {
+                    nextBday.setFullYear(today.getFullYear() + 1);
+                }
 
+                // 2. Oblicz datę przypomnienia (Cofamy się o 'daysOffset' dni)
+                const reminderDate = new Date(nextBday);
+                reminderDate.setDate(nextBday.getDate() - daysOffset);
+
+                // 3. Formatowanie dat dla Google (YYYYMMDDTHHMMSSZ)
+                const formatGTime = (date) => {
+                    return date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+                };
+
+                const start = formatGTime(reminderDate);
+                // Wydarzenie trwa 1 godzinę
+                const end = formatGTime(new Date(reminderDate.getTime() + (60 * 60 * 1000))); 
+
+                const text = encodeURIComponent(`🎂 PRZYPOMNIENIE: Urodziny ${person.name} (za ${daysOffset} dni)`);
+                const details = encodeURIComponent(
+                    `Pamiętaj o nadchodzących urodzinach!\n\n` +
+                    `👤 Kto: ${person.name}\n` +
+                    `📅 Data Urodzin: ${nextBday.toLocaleDateString('pl-PL')}\n` +
+                    `📞 Tel: ${person.phone || 'brak'}\n` +
+                    `📍 Adres: ${person.address || 'brak'}\n` +
+                    `📝 Notatki: ${person.notes || 'brak'}\n\n` +
+                    `⚠️ WAŻNE: Pamiętaj ustawić alarm/powiadomienie w tym wydarzeniu!`
+                );
+                
+                const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${start}/${end}&details=${details}`;
+                return url;
+            };
 
             const calculateAge = (birthDate) => {
                 if (!birthDate) return '';
@@ -537,7 +569,8 @@
                                             </div>
                                         </div>
                                         <div className="bg-slate-50/50 p-3 pl-7 border-t border-slate-100 flex items-center gap-2">
-                                            <button onClick={() => addToGoogleCalendar(person)} className="flex-1 bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 text-slate-600 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition flex items-center justify-center gap-2 shadow-sm">
+                                            {/* --- ZMIANA PRZYCISKU KALENDARZA --- */}
+                                            <button onClick={() => openCalendarModal(person)} className="flex-1 bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 text-slate-600 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition flex items-center justify-center gap-2 shadow-sm">
                                                 <Icons.Calendar size={14} /> Dodaj do Google
                                             </button>
                                             <button onClick={() => { setSelectedPerson(person); setIsDetailsOpen(true); }} className="flex-1 bg-white border border-slate-200 hover:border-amber-400 hover:text-amber-600 text-slate-600 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition flex items-center justify-center gap-2 shadow-sm">
@@ -662,6 +695,71 @@
                             </div>
                         </div>
                     )}
+
+                    {/* --- MODAL KALENDARZA --- */}
+                    {isCalendarModalOpen && calendarPerson && (
+                        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
+                                <div className="bg-amber-500 text-white p-4 flex justify-between items-center">
+                                    <h3 className="text-base font-bold flex items-center gap-2 uppercase tracking-wide">
+                                        <Icons.Calendar size={18} /> Przypomnienie
+                                    </h3>
+                                    <button onClick={() => setIsCalendarModalOpen(false)} className="text-white/80 hover:text-white transition"><Icons.X size={24} /></button>
+                                </div>
+                                <div className="p-6 space-y-5">
+                                    <div>
+                                        <p className="text-sm text-slate-600">Dla kogo dodajemy przypomnienie?</p>
+                                        <p className="text-lg font-bold text-slate-900 mt-1">{calendarPerson.name}</p>
+                                        <p className="text-xs text-slate-400 mt-0.5">
+                                            Data urodzin: {new Date(calendarPerson.birthDate).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })}
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Ile dni przed urodzinami?</label>
+                                        <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                            <button 
+                                                onClick={() => setDaysBeforeBirthday(d => Math.max(1, d - 1))}
+                                                className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-lg hover:bg-slate-100 font-bold text-slate-600"
+                                            >-</button>
+                                            <div className="flex-1 text-center">
+                                                <span className="text-2xl font-bold text-slate-800">{daysBeforeBirthday}</span>
+                                                <span className="text-sm text-slate-500 ml-1">dni</span>
+                                            </div>
+                                            <button 
+                                                onClick={() => setDaysBeforeBirthday(d => d + 1)}
+                                                className="w-10 h-10 flex items-center justify-center bg-white border border-slate-200 rounded-lg hover:bg-slate-100 font-bold text-slate-600"
+                                            >+</button>
+                                        </div>
+                                        {/* Obliczanie daty przypomnienia do podglądu */}
+                                        <p className="text-xs text-center text-amber-600 mt-2 font-medium">
+                                            Wydarzenie zostanie dodane: {(() => {
+                                                const today = new Date();
+                                                const bDate = new Date(calendarPerson.birthDate);
+                                                let nextBday = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
+                                                if (nextBday < today) nextBday.setFullYear(today.getFullYear() + 1);
+                                                const remDate = new Date(nextBday);
+                                                remDate.setDate(nextBday.getDate() - daysBeforeBirthday);
+                                                return remDate.toLocaleDateString('pl-PL');
+                                            })()}
+                                        </p>
+                                    </div>
+
+                                    <button 
+                                        onClick={() => {
+                                            const url = generateCalendarLink(calendarPerson, daysBeforeBirthday);
+                                            window.open(url, '_blank');
+                                            setIsCalendarModalOpen(false);
+                                        }}
+                                        className="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold py-3 rounded-xl shadow-lg transition flex justify-center items-center gap-2 uppercase tracking-wide text-sm"
+                                    >
+                                        <Icons.Calendar size={18} /> Dodaj do Kalendarza
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <footer className="text-slate-300 py-8 text-center text-xs opacity-50">
                         Wawrzak Board {new Date().getFullYear()}
                     </footer>
