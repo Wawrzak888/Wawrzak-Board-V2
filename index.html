@@ -13,10 +13,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Wawrzak Board">
     <meta name="theme-color" content="#0f172a">
+    <!-- Opcjonalnie: ikona dla iOS -->
     <link rel="apple-touch-icon" href="icon.png">
 
     <!-- Biblioteki zewnętrzne (Tailwind, React, Babel) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- DODANE: Konfiguracja Dark Mode -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -29,12 +31,15 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
     <style>
+        /* Blokada "gumkowania" strony przy przewijaniu */
         body { 
             -webkit-tap-highlight-color: transparent; 
             overscroll-behavior-y: none; 
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
+        /* Ukrycie paska przewijania dla estetyki */
         ::-webkit-scrollbar { width: 0px; background: transparent; }
+        
+        /* DODANE: Animacja dla Toast */
         @keyframes slideIn {
             from { transform: translateX(-50%) translateY(100%); opacity: 0; }
             to { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -44,6 +49,7 @@
         }
     </style>
 </head>
+<!-- DODANE: Klasy Dark Mode na body -->
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 select-none transition-colors duration-300">
     <div id="root"></div>
 
@@ -70,14 +76,43 @@
             Trash2: (props) => <IconWrapper {...props}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></IconWrapper>,
             Save: (props) => <IconWrapper {...props}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></IconWrapper>,
             X: (props) => <IconWrapper {...props}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></IconWrapper>,
+            // DODANE: Nowe ikony
             Moon: (props) => <IconWrapper {...props}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></IconWrapper>,
             Sun: (props) => <IconWrapper {...props}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41-1.41"/><path d="m19.07 4.93-1.41-1.41"/></IconWrapper>,
             Settings: (props) => <IconWrapper {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></IconWrapper>,
             Download: (props) => <IconWrapper {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></IconWrapper>,
             Check: (props) => <IconWrapper {...props}><polyline points="20 6 9 17 4 12"/></IconWrapper>,
-            EyeOff: (props) => <IconWrapper {...props}><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19.5C6.32 19.5 3 12.5 3 12.5a21.77 21.77 0 0 1 5.06-6.44"/><path d="M1 1l22 22"/><path d="M9.88 9.88a3 3 0 0 0 4.24 4.24"/><path d="M12 5.5c5.68 0 9 7 9 7a21.77 21.77 0 0 1-3.2 4.02"/></IconWrapper>,
-            Gift: (props) => <IconWrapper {...props}><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 8h18"/><path d="M12 8v13"/><path d="M12 8c-1.66 0-3-1.79-3-3.5S10.34 1 12 1s3 1.79 3 3.5S13.66 8 12 8Z"/></IconWrapper>,
-            MapPin: (props) => <IconWrapper {...props}><path d="M12 21s8-4.5 8-11a8 8 0 1 0-16 0c0 6.5 8 11 8 11z"/><circle cx="12" cy="10" r="3"/></IconWrapper>
+            EyeOff: (props) => <IconWrapper {...props}><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19.5C6.32 19.5 3 12.5 3 12.5a21.77 21.77 0 0 1 5.06-6.44"/><path d="M1 1l22 22"/><path d="M9.88 9.88a3 3 0 0 0 4.24 4.24"/><path d="M12 5.5c5.68 0 9 7 9 7a21.77 21.77 0 0 1-3.2 4.02"/></IconWrapper>
+        };
+        Icons.Gift = (props) => (
+            <IconWrapper {...props}>
+                <rect x="3" y="8" width="18" height="13" rx="2"/>
+                <path d="M3 8h18"/>
+                <path d="M12 8v13"/>
+                <path d="M12 8c-1.66 0-3-1.79-3-3.5S10.34 1 12 1s3 1.79 3 3.5S13.66 8 12 8Z"/>
+            </IconWrapper>
+        );
+        Icons.MapPin = (props) => (
+            <IconWrapper {...props}>
+                <path d="M12 21s8-4.5 8-11a8 8 0 1 0-16 0c0 6.5 8 11 8 11z"/>
+                <circle cx="12" cy="10" r="3"/>
+            </IconWrapper>
+        );
+
+        // --- DODANE: Funkcje pomocnicze do awatarów ---
+        const getInitials = (name) => {
+            if (!name) return '??';
+            return String(name).split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+        };
+
+        const stringToColor = (str) => {
+            if (!str) return '#94a3b8';
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+            return '#' + '00000'.substring(0, 6 - c.length) + c;
         };
 
         // --- DANE STARTOWE ---
@@ -95,27 +130,6 @@
             { id: 11, name: 'Kamil Wawrzak',      birthDate: '1991-04-21', phone: '', notes: '', type: 'family' },
         ];
 
-        // --- FUNKCJE POMOCNICZE (AWATARY) ---
-        const getInitials = (name) => {
-            if (!name) return '??';
-            return String(name).split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
-        };
-
-        const stringToColor = (str) => {
-            if (!str) return '#94a3b8';
-            let hash = 0;
-            try {
-                for (let i = 0; i < str.length; i++) {
-                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-                }
-            } catch(e) {
-                return '#94a3b8';
-            }
-            const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
-            return '#' + '00000'.substring(0, 6 - c.length) + c;
-        };
-
-        // --- FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyDqNfSnW90aBAvu98nJeqMgJbbWXwVwZf4",
             authDomain: "wawrzak-board.firebaseapp.com",
@@ -308,45 +322,35 @@
             const [editingPerson, setEditingPerson] = useState(null);
             const [formData, setFormData] = useState({ name: '', birthDate: '', phone: '', address: '', notes: '', reminderDays: 3, type: 'family' });
             const [currentUserId, setCurrentUserId] = useState(() => {
-                try {
-                    const saved = localStorage.getItem('wawrzakCurrentUserId');
-                    return saved ? Number(saved) : null;
-                } catch(e) { return null; }
+                const saved = localStorage.getItem('wawrzakCurrentUserId');
+                return saved ? Number(saved) : null;
             });
             const [isDetailsOpen, setIsDetailsOpen] = useState(false);
             const [selectedPerson, setSelectedPerson] = useState(null);
             const [isUserPickerOpen, setIsUserPickerOpen] = useState(false);
             
-            // --- NOWE STANY ---
-            const [darkMode, setDarkMode] = useState(() => {
-                try {
-                    return localStorage.getItem('wawrzakDarkMode') === 'true';
-                } catch(e) { return false; }
-            });
+            // --- DODANE: Stany dla nowych funkcji ---
+            const [darkMode, setDarkMode] = useState(() => localStorage.getItem('wawrzakDarkMode') === 'true');
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
             const [calendarPerson, setCalendarPerson] = useState(null);
             const [daysBeforeBirthday, setDaysBeforeBirthday] = useState(7);
-            
-            // Toast State
             const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
 
-            // Dark Mode Effect
+            // --- DODANE: Efekt Dark Mode ---
             useEffect(() => {
                 if (darkMode) {
                     document.documentElement.classList.add('dark');
                 } else {
                     document.documentElement.classList.remove('dark');
                 }
-                try {
-                    localStorage.setItem('wawrzakDarkMode', darkMode);
-                } catch(e) {}
+                localStorage.setItem('wawrzakDarkMode', darkMode);
             }, [darkMode]);
 
             const showToast = (message, type = 'success') => {
                 setToast({ visible: true, message, type });
                 setTimeout(() => {
-                    setToast(prev => ({ ...prev, visible: false }));
+                    setToast({ ...toast, visible: false });
                 }, 3000);
             };
 
@@ -398,9 +402,7 @@
 
             useEffect(() => {
                 if (currentUserId != null) {
-                    try {
-                        localStorage.setItem('wawrzakCurrentUserId', String(currentUserId));
-                    } catch(e) {}
+                    localStorage.setItem('wawrzakCurrentUserId', String(currentUserId));
                 }
             }, [currentUserId]);
 
@@ -444,7 +446,7 @@
                 }
             };
 
-            // Export JSON
+            // --- DODANE: Eksport ---
             const handleExportData = () => {
                 const dataStr = JSON.stringify(people, null, 2);
                 const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -456,7 +458,7 @@
                 showToast('Pobrano kopię zapasową!');
             };
 
-            // --- KALENDARZ ---
+            // --- DODANE: Logika Kalendarza (Modal) ---
             const openCalendarModal = (person) => {
                 if (!person.birthDate) return alert('Ta osoba nie ma ustawionej daty urodzenia!');
                 setCalendarPerson(person);
@@ -542,9 +544,11 @@
                             <button onClick={() => openModal()} className="bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white px-8 py-3 rounded-full shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2 font-bold text-sm uppercase tracking-wide">
                                 <Icons.UserPlus size={20} /> Dodaj Osobę
                             </button>
+                            
+                            {/* DODANE: Przyciski w nagłówku */}
                             <div className="mt-4 flex gap-2 w-full max-w-md justify-center">
                                 <button onClick={() => setIsUserPickerOpen(true)} className="flex-1 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-full text-xs font-bold uppercase tracking-wide flex items-center justify-center gap-2">
-                                    <Icons.Users size={16} /> {currentUserId ? (getPersonNameById(currentUserId) || 'User').split(' ')[0] : 'Kto ty?'}
+                                    <Icons.Users size={16} /> {currentUserId ? getPersonNameById(currentUserId).split(' ')[0] : 'Kto ty?'}
                                 </button>
                                 <button onClick={() => setDarkMode(!darkMode)} className="bg-white/10 hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition">
                                     {darkMode ? <Icons.Sun size={18} /> : <Icons.Moon size={18} />}
@@ -578,21 +582,21 @@
                                 {displayList.map(person => (
                                     <div key={person.id} className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden flex flex-col relative group hover:shadow-md transition-shadow">
                                         <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${person.type === 'family' ? 'bg-amber-400' : 'bg-blue-400'}`}></div>
+                                        
+                                        {/* ZMODYFIKOWANE: Dodany Awatar i Flexbox */}
                                         <div className="p-5 pl-7 flex-grow flex gap-4">
-                                            {/* AWATAR */}
                                             <div 
                                                 className="w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-lg shadow-sm"
                                                 style={{ backgroundColor: stringToColor(person.name) }}
                                             >
                                                 {getInitials(person.name)}
                                             </div>
-                                            
                                             <div className="flex-grow">
-                                                <div className="flex justify-between items-start mb-1">
-                                                    <h3 className="text-lg font-bold leading-tight text-slate-800 dark:text-slate-100">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight flex items-center gap-2">
                                                         {person.name}
                                                         {(person.wishlist && person.wishlist.length > 0) && (
-                                                            <Icons.Gift size={14} className="text-amber-500 inline ml-1 mb-1" />
+                                                            <Icons.Gift size={16} className="text-amber-500" />
                                                         )}
                                                     </h3>
                                                     {person.birthDate && (
@@ -600,19 +604,42 @@
                                                             {calculateAge(person.birthDate)} lat
                                                         </span>
                                                     )}
+                                                    {Number.isFinite(person.__days) && (
+                                                        <span className={`ml-2 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide ${person.__days === 0 ? 'bg-pink-500 text-white animate-pulse' : (person.__days <= 30 ? 'bg-amber-400 text-slate-900' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300')}`}>
+                                                            {person.__days === 0 ? 'DZIŚ!' : `Za ${person.__days} dni`}
+                                                        </span>
+                                                    )}
                                                 </div>
-                                                {Number.isFinite(person.__days) && (
-                                                    <span className={`inline-block text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide mb-2 ${person.__days === 0 ? 'bg-pink-500 text-white animate-pulse' : (person.__days <= 30 ? 'bg-amber-400 text-slate-900' : 'bg-slate-200 dark:bg-slate-600 text-slate-600 dark:text-slate-300')}`}>
-                                                        {person.__days === 0 ? 'DZIŚ!' : `Za ${person.__days} dni`}
-                                                    </span>
-                                                )}
-                                                <div className="space-y-1 text-sm text-slate-500 dark:text-slate-400 mt-2">
-                                                    {person.birthDate && <div className="flex items-center gap-2"><Icons.Calendar size={14} /> {new Date(person.birthDate).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })}</div>}
-                                                    {person.phone && <div className="flex items-center gap-2"><Icons.Phone size={14} /> <a href={`tel:${person.phone}`} className="hover:text-blue-500 transition">{person.phone}</a></div>}
+                                                <div className="space-y-2 text-slate-600 dark:text-slate-400 text-sm">
+                                                    <div className="flex items-center gap-3">
+                                                        <Icons.Calendar size={16} className="text-slate-400" />
+                                                        <span className={!person.birthDate ? 'text-red-400 text-xs font-medium' : ''}>
+                                                            {person.birthDate ? new Date(person.birthDate).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' }) : 'BRAK DATY'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <Icons.Phone size={16} className="text-slate-400" />
+                                                        <a href={`tel:${person.phone}`} className="hover:text-blue-600 transition">
+                                                            {person.phone || <span className="text-slate-300 text-xs dark:text-slate-500">Brak telefonu</span>}
+                                                        </a>
+                                                    </div>
+                                                    {person.address && (
+                                                        <div className="flex items-center gap-3">
+                                                            <Icons.MapPin size={16} className="text-slate-400" />
+                                                            <span className="text-slate-600 dark:text-slate-400 text-sm whitespace-pre-line">{person.address}</span>
+                                                        </div>
+                                                    )}
+                                                    {person.notes && (
+                                                        <div className="mt-3 bg-yellow-50/50 dark:bg-yellow-900/20 p-2 rounded text-xs text-slate-600 dark:text-slate-300 border-l-2 border-yellow-200 dark:border-yellow-600 italic">
+                                                            {person.notes}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
+                                        
                                         <div className="bg-slate-50 dark:bg-slate-700/50 p-3 pl-7 border-t border-slate-100 dark:border-slate-700 flex items-center gap-2">
+                                            {/* ZMODYFIKOWANY: Przycisk otwierający Modal */}
                                             <button onClick={() => openCalendarModal(person)} className="flex-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 text-slate-600 dark:text-slate-300 py-2 px-3 rounded-lg text-xs font-bold uppercase tracking-wide transition flex items-center justify-center gap-2 shadow-sm">
                                                 <Icons.Calendar size={14} /> Kalendarz
                                             </button>
@@ -639,7 +666,7 @@
                                     <button onClick={() => { setIsDetailsOpen(false); setSelectedPerson(null); }} className="text-slate-400 hover:text-white transition"><Icons.X size={24} /></button>
                                 </div>
                                 <div className="p-6 space-y-4">
-                                    <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+                                    <div className="space-y-2 text-slate-600 dark:text-slate-300 text-sm">
                                         <div className="flex items-center gap-3">
                                             <Icons.Calendar size={16} className="text-slate-400" />
                                             <span className={!selectedPerson.birthDate ? 'text-red-400 text-xs font-medium' : ''}>
@@ -655,11 +682,11 @@
                                         {selectedPerson.address && (
                                             <div className="flex items-center gap-3">
                                                 <Icons.MapPin size={16} className="text-slate-400" />
-                                                <span className="whitespace-pre-line">{selectedPerson.address}</span>
+                                                <span className="text-slate-600 dark:text-slate-400 text-sm whitespace-pre-line">{selectedPerson.address}</span>
                                             </div>
                                         )}
                                         {selectedPerson.notes && (
-                                            <div className="mt-3 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded text-xs text-slate-600 dark:text-slate-300 border-l-2 border-yellow-200 dark:border-yellow-600 italic">
+                                            <div className="mt-3 bg-yellow-50/50 dark:bg-yellow-900/20 p-2 rounded text-xs text-slate-600 dark:text-slate-300 border-l-2 border-yellow-200 dark:border-yellow-600 italic">
                                                 {selectedPerson.notes}
                                             </div>
                                         )}
@@ -739,7 +766,7 @@
                         </div>
                     )}
 
-                    {/* --- MODAL KALENDARZA --- */}
+                    {/* --- DODANE: Modal Kalendarza --- */}
                     {isCalendarModalOpen && calendarPerson && (
                         <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -776,15 +803,13 @@
                                         </div>
                                         <p className="text-xs text-center text-amber-600 dark:text-amber-400 mt-2 font-medium">
                                             Wydarzenie zostanie dodane: {(() => {
-                                                try {
-                                                    const today = new Date();
-                                                    const bDate = new Date(calendarPerson.birthDate);
-                                                    let nextBday = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
-                                                    if (nextBday < today) nextBday.setFullYear(today.getFullYear() + 1);
-                                                    const remDate = new Date(nextBday);
-                                                    remDate.setDate(nextBday.getDate() - daysBeforeBirthday);
-                                                    return remDate.toLocaleDateString('pl-PL');
-                                                } catch(e) { return 'Błąd daty'; }
+                                                const today = new Date();
+                                                const bDate = new Date(calendarPerson.birthDate);
+                                                let nextBday = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
+                                                if (nextBday < today) nextBday.setFullYear(today.getFullYear() + 1);
+                                                const remDate = new Date(nextBday);
+                                                remDate.setDate(nextBday.getDate() - daysBeforeBirthday);
+                                                return remDate.toLocaleDateString('pl-PL');
                                             })()}
                                         </p>
                                     </div>
@@ -804,7 +829,7 @@
                         </div>
                     )}
 
-                    {/* --- MODAL USTAWIENIA --- */}
+                    {/* --- DODANE: Modal Ustawień --- */}
                     {isSettingsOpen && (
                          <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -837,7 +862,7 @@
                          </div>
                     )}
                     
-                    {/* --- TOAST NOTIFICATION --- */}
+                    {/* --- DODANE: Toast Notification --- */}
                     {toast.visible && (
                         <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full shadow-lg z-[60] flex items-center gap-2 toast-animate font-bold text-sm uppercase tracking-wide ${toast.type === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'}`}>
                             {toast.type === 'success' ? <Icons.Check size={16} /> : <Icons.X size={16} />}
@@ -845,7 +870,7 @@
                         </div>
                     )}
 
-                    <footer className="text-slate-300 py-8 text-center text-xs opacity-50 dark:text-slate-600">
+                    <footer className="text-slate-300 dark:text-slate-600 py-8 text-center text-xs opacity-50">
                         Wawrzak Board {new Date().getFullYear()}
                     </footer>
                 </div>
