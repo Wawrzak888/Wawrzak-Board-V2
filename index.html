@@ -20,7 +20,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class', // Włączamy obsługę dark mode przez klasę
+            darkMode: 'class',
         }
     </script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -36,7 +36,6 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
         ::-webkit-scrollbar { width: 0px; background: transparent; }
-        /* Animacja dla Toasta */
         @keyframes slideIn {
             from { transform: translateX(-50%) translateY(100%); opacity: 0; }
             to { transform: translateX(-50%) translateY(0); opacity: 1; }
@@ -110,15 +109,21 @@
         ];
 
         // --- FUNKCJE POMOCNICZE (AWATARY) ---
+        // Zabezpieczone przed null/undefined
         const getInitials = (name) => {
             if (!name) return '??';
-            return name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            return String(name).split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
         };
 
         const stringToColor = (str) => {
+            if (!str) return '#94a3b8'; // Domyślny szary (slate-400)
             let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
+            try {
+                for (let i = 0; i < str.length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+            } catch(e) {
+                return '#94a3b8';
             }
             const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
             return '#' + '00000'.substring(0, 6 - c.length) + c;
@@ -317,15 +322,21 @@
             const [editingPerson, setEditingPerson] = useState(null);
             const [formData, setFormData] = useState({ name: '', birthDate: '', phone: '', address: '', notes: '', reminderDays: 3, type: 'family' });
             const [currentUserId, setCurrentUserId] = useState(() => {
-                const saved = localStorage.getItem('wawrzakCurrentUserId');
-                return saved ? Number(saved) : null;
+                try {
+                    const saved = localStorage.getItem('wawrzakCurrentUserId');
+                    return saved ? Number(saved) : null;
+                } catch(e) { return null; }
             });
             const [isDetailsOpen, setIsDetailsOpen] = useState(false);
             const [selectedPerson, setSelectedPerson] = useState(null);
             const [isUserPickerOpen, setIsUserPickerOpen] = useState(false);
             
             // --- NOWE STANY ---
-            const [darkMode, setDarkMode] = useState(() => localStorage.getItem('wawrzakDarkMode') === 'true');
+            const [darkMode, setDarkMode] = useState(() => {
+                try {
+                    return localStorage.getItem('wawrzakDarkMode') === 'true';
+                } catch(e) { return false; }
+            });
             const [isSettingsOpen, setIsSettingsOpen] = useState(false);
             const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
             const [calendarPerson, setCalendarPerson] = useState(null);
@@ -341,12 +352,16 @@
                 } else {
                     document.documentElement.classList.remove('dark');
                 }
-                localStorage.setItem('wawrzakDarkMode', darkMode);
+                try {
+                    localStorage.setItem('wawrzakDarkMode', darkMode);
+                } catch(e) {}
             }, [darkMode]);
 
             const showToast = (message, type = 'success') => {
                 setToast({ visible: true, message, type });
-                setTimeout(() => setToast({ ...toast, visible: false }), 3000);
+                setTimeout(() => {
+                    setToast(prev => ({ ...prev, visible: false }));
+                }, 3000);
             };
 
             useEffect(() => {
@@ -397,7 +412,9 @@
 
             useEffect(() => {
                 if (currentUserId != null) {
-                    localStorage.setItem('wawrzakCurrentUserId', String(currentUserId));
+                    try {
+                        localStorage.setItem('wawrzakCurrentUserId', String(currentUserId));
+                    } catch(e) {}
                 }
             }, [currentUserId]);
 
@@ -541,7 +558,7 @@
                             </button>
                             <div className="mt-4 flex gap-2 w-full max-w-md justify-center">
                                 <button onClick={() => setIsUserPickerOpen(true)} className="flex-1 bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-full text-xs font-bold uppercase tracking-wide flex items-center justify-center gap-2">
-                                    <Icons.Users size={16} /> {currentUserId ? getPersonNameById(currentUserId).split(' ')[0] : 'Kto ty?'}
+                                    <Icons.Users size={16} /> {currentUserId ? (getPersonNameById(currentUserId) || 'User').split(' ')[0] : 'Kto ty?'}
                                 </button>
                                 <button onClick={() => setDarkMode(!darkMode)} className="bg-white/10 hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition">
                                     {darkMode ? <Icons.Sun size={18} /> : <Icons.Moon size={18} />}
@@ -773,13 +790,15 @@
                                         </div>
                                         <p className="text-xs text-center text-amber-600 dark:text-amber-400 mt-2 font-medium">
                                             Wydarzenie zostanie dodane: {(() => {
-                                                const today = new Date();
-                                                const bDate = new Date(calendarPerson.birthDate);
-                                                let nextBday = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
-                                                if (nextBday < today) nextBday.setFullYear(today.getFullYear() + 1);
-                                                const remDate = new Date(nextBday);
-                                                remDate.setDate(nextBday.getDate() - daysBeforeBirthday);
-                                                return remDate.toLocaleDateString('pl-PL');
+                                                try {
+                                                    const today = new Date();
+                                                    const bDate = new Date(calendarPerson.birthDate);
+                                                    let nextBday = new Date(today.getFullYear(), bDate.getMonth(), bDate.getDate());
+                                                    if (nextBday < today) nextBday.setFullYear(today.getFullYear() + 1);
+                                                    const remDate = new Date(nextBday);
+                                                    remDate.setDate(nextBday.getDate() - daysBeforeBirthday);
+                                                    return remDate.toLocaleDateString('pl-PL');
+                                                } catch(e) { return 'Błąd daty'; }
                                             })()}
                                         </p>
                                     </div>
