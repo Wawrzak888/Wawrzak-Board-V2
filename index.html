@@ -76,22 +76,10 @@
             Settings: (props) => <IconWrapper {...props}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></IconWrapper>,
             Download: (props) => <IconWrapper {...props}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></IconWrapper>,
             Check: (props) => <IconWrapper {...props}><polyline points="20 6 9 17 4 12"/></IconWrapper>,
-            EyeOff: (props) => <IconWrapper {...props}><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19.5C6.32 19.5 3 12.5 3 12.5a21.77 21.77 0 0 1 5.06-6.44"/><path d="M1 1l22 22"/><path d="M9.88 9.88a3 3 0 0 0 4.24 4.24"/><path d="M12 5.5c5.68 0 9 7 9 7a21.77 21.77 0 0 1-3.2 4.02"/></IconWrapper>
+            EyeOff: (props) => <IconWrapper {...props}><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19.5C6.32 19.5 3 12.5 3 12.5a21.77 21.77 0 0 1 5.06-6.44"/><path d="M1 1l22 22"/><path d="M9.88 9.88a3 3 0 0 0 4.24 4.24"/><path d="M12 5.5c5.68 0 9 7 9 7a21.77 21.77 0 0 1-3.2 4.02"/></IconWrapper>,
+            Gift: (props) => <IconWrapper {...props}><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 8h18"/><path d="M12 8v13"/><path d="M12 8c-1.66 0-3-1.79-3-3.5S10.34 1 12 1s3 1.79 3 3.5S13.66 8 12 8Z"/></IconWrapper>,
+            MapPin: (props) => <IconWrapper {...props}><path d="M12 21s8-4.5 8-11a8 8 0 1 0-16 0c0 6.5 8 11 8 11z"/><circle cx="12" cy="10" r="3"/></IconWrapper>
         };
-        Icons.Gift = (props) => (
-            <IconWrapper {...props}>
-                <rect x="3" y="8" width="18" height="13" rx="2"/>
-                <path d="M3 8h18"/>
-                <path d="M12 8v13"/>
-                <path d="M12 8c-1.66 0-3-1.79-3-3.5S10.34 1 12 1s3 1.79 3 3.5S13.66 8 12 8Z"/>
-            </IconWrapper>
-        );
-        Icons.MapPin = (props) => (
-            <IconWrapper {...props}>
-                <path d="M12 21s8-4.5 8-11a8 8 0 1 0-16 0c0 6.5 8 11 8 11z"/>
-                <circle cx="12" cy="10" r="3"/>
-            </IconWrapper>
-        );
 
         // --- DANE STARTOWE ---
         const INITIAL_FAMILY = [
@@ -109,14 +97,13 @@
         ];
 
         // --- FUNKCJE POMOCNICZE (AWATARY) ---
-        // Zabezpieczone przed null/undefined
         const getInitials = (name) => {
             if (!name) return '??';
             return String(name).split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
         };
 
         const stringToColor = (str) => {
-            if (!str) return '#94a3b8'; // Domyślny szary (slate-400)
+            if (!str) return '#94a3b8';
             let hash = 0;
             try {
                 for (let i = 0; i < str.length; i++) {
